@@ -1,4 +1,4 @@
-import ImageGenerator from '@/components/ImageGenerator';
+import ImageGenerator from '../components/ImageGenerator';
 
 /**
  * Licensed under the Apache License 2.0
