@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 
 const MODEL_ID = "stable-diffusion-xl-base-1.0";
+const INTERNAL_API_URL = process.env.INTERNAL_API_URL;
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY;
 
 // Internal caching to avoid redundant heavy compute for same prompts
 const cache = new Map();
@@ -26,17 +28,28 @@ export async function POST(req: Request) {
     }
 
     /**
-     * INTERNAL API LOGIC
-     * This section interacts with the free internal engine.
-     * No paywalls, no billing hard limits.
+    INTERNAL API LOGIC
+    This section interacts with the real internal image generation microservice.
      */
-    
-    // Simulate API delay for generation
-    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // This is a placeholder for the actual internal image generation microservice
-    // For demonstration, we use a high-quality seeded placeholder representing the model output
-    const imageUrl = `https://picsum.photos/seed/${encodeURIComponent(prompt.slice(0, 10))}/1024/1024`;
+    const response = await fetch(`${INTERNAL_API_URL}/generate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${INTERNAL_API_KEY}`,
+      },
+      body: JSON.stringify({
+        prompt,
+        model: MODEL_ID,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const imageUrl = data.url;
 
     // Store in internal cache for aggressive performance
     cache.set(prompt, imageUrl);
