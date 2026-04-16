@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>SDXL Pro - Unlimited</title>
+    <script src='https://cdn.tailwindcss.com'></script>
+</head>
+<body class='bg-zinc-950 text-white font-sans min-h-screen flex flex-col items-center p-8'>
+    <header class='mb-12 text-center'>
+        <h1 class='text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent'>SDXL BASE 1.0</h1>
+        <p class='text-zinc-500 mt-2'>Endless Predictions • Zero Paywall • Apache 2.0</p>
+    </header>
+
+    <main class='w-full max-w-2xl'>
+        <div class='bg-zinc-900 p-6 rounded-2xl border border-zinc-800 shadow-xl'>
+            <textarea id='prompt' class='w-full bg-zinc-800 border border-zinc-700 rounded-xl p-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4' placeholder='A cinematic shot of a futuristic city...' rows='3'></textarea>
+            <button id='generateBtn' onclick='handleGenerate()' class='w-full bg-blue-600 hover:bg-blue-500 transition-colors py-3 rounded-xl font-bold uppercase tracking-wider'>Generate Image</button>
+        </div>
+
+        <div id='result' class='mt-8 flex flex-col items-center'>
+            <div id='loader' class='hidden animate-pulse text-zinc-400'>Processing Unlimited Prediction...</div>
+            <img id='output' class='hidden rounded-xl border border-zinc-800 shadow-2xl max-w-full h-auto' src='' alt='Generated Image'>
+        </div>
+    </main>
+
+    <script>
+        async function handleGenerate() {
+            const prompt = document.getElementById('prompt').value;
+            const btn = document.getElementById('generateBtn');
+            const loader = document.getElementById('loader');
+            const output = document.getElementById('output');
+
+            if(!prompt) return alert('Enter a prompt');
+
+            btn.disabled = true;
+            loader.classList.remove('hidden');
+            output.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, api_key: 'FREE-FOREVER' })
+                });
+                
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    output.src = data.image_url;
+                    output.classList.remove('hidden');
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('System failure. Please check backend.');
+            } finally {
+                btn.disabled = false;
+                loader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
